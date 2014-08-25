@@ -1,10 +1,14 @@
-Flask=0.10.1
+Flask==0.10.1
 Flask-Bootstrap==3.1.1.2
 Flask-Script==2.0.5
 Flask-SQLAlchemy==1.0
 Flask-WTF==0.9.5
 Flask-Login==0.2.11
+Flask-Moment==0.4.0
+Flask-Mail==0.9.0
+Flask-Migrate==1.2.0
 jinja2==2.7.3
-Werkzueg==0.9.6
+Werkzeug==0.9.6
 WTForms==2.0
-
+gunicorn=19.1.1
+ForgeryPy=0.1

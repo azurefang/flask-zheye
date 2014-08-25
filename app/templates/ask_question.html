@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %} ask {% endblock %}
+{% block page_content %}
+<div>
+    {{ wtf.quick_form(form) }}
+<script type="text/javascript">
+
+    var tagApi = jQuery("#choose").tagsManager({
+        prefilled: ["生活", "学习"]
+    });
+
+    jQuery("#choose").typeahead({
+        name: 'topics',
+        limit: 15,
+        prefetch: '/ajax/topic'
+    }).on('typeahead:selected', function (e, d) {
+
+        tagApi.tagsManager("pushTag", d.value);
+
+    });
+</script>
+</div>
+
+
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}
+

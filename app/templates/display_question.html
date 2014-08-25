@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %} {{ question.title }} {% endblock %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block page_content %}
+
+
+{% for topic in question.topics %}
+<a class="btn btn-info" href="{{ url_for('main.topic', tid=topic.id)}}">{{ topic.name }}</a>
+{% endfor %}
+<div class="question">
+<h3>{{ question.title }}</h3>
+<div class="content">{{ question.content }}</div>
+</div>
+<div class="hello">
+    <b>{{ question.answers.all()|length }}个答案</b>
+</div>
+{% for answer in question.answers %}
+<div class="hello">
+<b>{{ answer.owner.firstname }}{{ answer.owner.lastname }}</b>
+<div class="content">
+{{ answer.content|safe }}
+</div>
+{{ answer.time.strftime('%Y-%m-%d') }}
+    <span>Thank</span>
+    <span>Collect</span>
+</div>
+{% endfor %}
+
+<div class="answer">
+    <a href="{{ url_for('main.people', pid=current_user.id) }}">{{ current_user.firstname }}{{ current_user.lastname }}</a>
+<div class="content">
+{{ wtf.quick_form(form)}}
+</div>
+<script type="text/javascript">
+var editor = new Simditor({
+  textarea: $('#editor')
+});
+</script>
+</div>
+{% endblock %}
+{% block sidebar %}
+<button id="follow" class="btn btn-primary">关注</button>
+
+<script type="text/javascript">
+$(document).ready(function(){
+$("#follow").click(function(){
+
+    $.post("/ajax/relationship",
+    {
+        type: "question",
+        id : window.location.pathname.split('/')[2]
+    },
+function(data, status) {
+    if ($("#follow").text() == "关注")
+    $("#follow").text("取消关注");
+    else
+    $("#follow").text("关注");
+}
+
+    );
+});
+});
+ $.get("/ajax/relationship",
+{
+    type: "question",
+    id : window.location.pathname.split('/')[2]
+},
+    function(data, status){
+        $("#follow").text(data)
+    }
+);
+
+$(".control-label").hide();
+</script>
+{% endblock %}

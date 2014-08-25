@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %} {{ user.firstname }}{{ user.lastname }}- 者也{% endblock %}
+{% block page_content %}
+    {{ user.firstname }}{{ user.lastname }}
+{% endblock %}
+
+{% block sidebar %}
+{% if current_user != user %}
+<button id="follow" class="btn btn-primary">关注</button>
+{% endif %}
+
+<script type="text/javascript">
+$(document).ready(function(){
+$("#follow").click(function(){
+
+    $.post("/ajax/relationship",
+    {
+        type: "user",
+        id : window.location.pathname.split('/')[2]
+    },
+function(data, status) {
+    if ($("#follow").text() == "关注")
+    $("#follow").text("取消关注");
+    else
+    $("#follow").text("关注");
+}
+
+    );
+});
+});
+ $.get("/ajax/relationship",
+{
+    type: "user",
+    id : window.location.pathname.split('/')[2]
+},
+    function(data, status){
+        $("#follow").text(data)
+    }
+);
+</script>
+{% endblock %}

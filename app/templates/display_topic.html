@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %} {{ topic.name }} {% endblock %}
+{% block page_content %}
+    <h3>{{ topic.name }}</h3>
+    {% for i in topic.related_questions.all() %}
+     <div class="hello">
+        <p><a href="{{ url_for('main.question', qid=i.id+19550224) }}">{{ i.title }}</a></p>
+        <div>
+        {{ i.content }}
+        <div>
+        {{ i.time.strftime('%Y-%m-%d') }}
+        </div>
+        </div>
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block sidebar %}
+<button id="follow" class="btn btn-primary">关注</button>
+
+<script type="text/javascript">
+$(document).ready(function(){
+$("#follow").click(function(){
+
+    $.post("/ajax/relationship",
+    {
+        type: "topic",
+        id : window.location.pathname.split('/')[2]
+    },
+function(data, status) {
+    if ($("#follow").text() == "关注")
+    $("#follow").text("取消关注");
+    else
+    $("#follow").text("关注");
+}
+
+    );
+});
+});
+ $.get("/ajax/relationship",
+{
+    type: "topic",
+    id : window.location.pathname.split('/')[2]
+},
+    function(data, status){
+        $("#follow").text(data)
+    }
+);
+</script>
+<div class="content">
+{{ topic.followers|length }} 个用户关注这个话题
+</div>
+    <div>
+{% endblock %}
+</div>
