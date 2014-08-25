@@ -1,5 +1,10 @@
-Flask
-Flask-Bootstrap
-Flask-Script
-Flask-SQLAlchemy
-Flask-WTF
+Flask=0.10.1
+Flask-Bootstrap==3.1.1.2
+Flask-Script==2.0.5
+Flask-SQLAlchemy==1.0
+Flask-WTF==0.9.5
+Flask-Login==0.2.11
+jinja2==2.7.3
+Werkzueg==0.9.6
+WTForms==2.0
+

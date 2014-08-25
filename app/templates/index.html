@@ -1,9 +1,42 @@
 {% extends "base.html" %}
 
-{% block title %}zheye {% endblock %}
+{% block title %}首页-者也{% endblock %}
+{% import "_macros.html" as macros %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1>Hello, {% if current_user.is_authenticated() %}{{ current_user.domain }}{% else %}Strange{% endif %}!</h1>
+<div class="contaner">
+<b>最新动态</b>
+{% for activity in activities %}
+<div class="hello">
+<a href="{{ url_for('main.people', pid=activity.owner.id) }}">{{ activity.owner.firstname}}{{ activity.owner.lastname }}</a>
+{% if activity.move==1 %}
+回答了问题
+{% elif activity.move==2 %}
+关注了问题
+{% elif activity.move==3 %}
+提了问题
+{% elif activity.move==4 %}
+关注了话题
+{% endif %}
+{% if activity.move!=4 %}
+<a href="{{ url_for('main.question', qid=activity.question.id+19550224) }}"><b>{{ activity.question.title }}</b></a>
+{% else %}
+<a href="{{ url_for('main.topic', tid=activity.topic.id) }}">{{ activity.topic.name }}</a>
+{% endif %}
+{% if activity.move==1 %}
+<div>
+{{ activity.answer.content|safe }}
+</div>
+{% elif activity.move==3 %}
+<div>
+{{ activity.question.content}}
+</div>
+{% endif %}
+</div>
+{% endfor %}
+</div>
+
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.index') }}
 </div>
 {% endblock %}

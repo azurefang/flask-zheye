@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
+import os
+
 from app import create_app, db
-from app.models import *
 from flask.ext.script import Manager, Shell
 from flask.ext.migrate import Migrate, MigrateCommand
 
-app = create_app('default')
+app = create_app(os.environ.get('FLASK_CONFIG') or 'default')
+#app = create_app('production')
 
 manager = Manager(app)
 migrate = Migrate(app, db)
