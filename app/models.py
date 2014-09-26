@@ -1,5 +1,5 @@
 from datetime import datetime
-from app import db
+from app import db, conn
 from flask import current_app
 import forgery_py
 
@@ -89,7 +89,7 @@ class User(UserMixin, db.Model):
 
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'comfirm': self.id})
+        return s.dumps({'confirm': self.id})
 
     def confirm(self, token):
         s = Serializer(current_app.config['SECRET_KEY'])
@@ -213,3 +213,11 @@ class Activity(db.Model):
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'))
     answer_id = db.Column(db.Integer, db.ForeignKey('answer.id'))
     time = db.Column(db.DateTime, default=datetime.utcnow())
+
+
+class Message(db.Model):
+    __tablename__ = 'message'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    read = db.Column(db.Boolean, default=False)
+    content = db.Column(db.Text)

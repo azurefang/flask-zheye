@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -6,8 +7,17 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'YOU CAN GUESS'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
-    ZHEYE_MAIL_SENDER = 'ZHEYE Admin <xidianft@gmail.com>'
+    ZHEYE_MAIL_SENDER = 'ZHEYE Admin <noreply@zheye.com>'
     ZHEYE_ADMIN = os.environ.get('ZHEYE_ADMIN')
+    CELERY_BROKER_URL='redis://localhost:6379',
+    #CELERY_RESULT_BACKEND='redis://localhost:6379'
+    CELERYBEAT_SCHEDULE = {
+    'add-every-1-seconds': {
+        'task': 'tasks.message_queue',
+        'schedule': timedelta(seconds=5),
+        #'args': (16, 16)
+    },
+}
 
     @staticmethod
     def init_app(app):

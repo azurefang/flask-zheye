@@ -3,9 +3,12 @@ from flask import render_template, redirect, abort, request, flash, Markup
 from flask.ext.login import current_user, login_required
 from sqlalchemy import desc
 from . import main
-from app import db
+from app import db, conn
 from .forms import AskForm, AnswerForm
 from ..models import *
+
+import sys
+sys.setdefaultencoding('utf8')
 
 @main.route('/')
 @main.route('/index')
@@ -55,6 +58,7 @@ def ask():
         new_activity = Activity(user_id=owner_id, question_id=new_question.id, move=3)
         db.session.add(new_activity)
         db.session.commit()
+        conn.lpush("message", "user" + str(current_user.id) + ":xx ask a new question")
         return redirect('/question/{}'.format(new_question.id+19550224))
     return render_template('ask_question.html', form=form)
 

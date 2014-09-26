@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 import sys
-from flask import request, json, jsonify, Response
+from flask import request, json, Response
 from . import ajax
 from flask.ext.login import current_user
 from ..models import *

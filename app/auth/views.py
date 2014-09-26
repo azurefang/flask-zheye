@@ -5,17 +5,19 @@ from . import auth
 from ..email import send_mail
 from ..models import User
 from .forms import LoginForm, RegistrationForm
-from app import db
-from app import create_app
+from app import db, conn
 
 
 @auth.before_app_request
 def before_request():
     if current_user.is_authenticated():
         current_user.ping()
+        '''
         if not current_user.confirmed \
                 and request.endpoint[:5] != 'auth.':
             return redirect(url_for('auth.unconfirmed'))
+        '''
+
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -81,10 +83,14 @@ def resend_confirmation():
 
 @auth.route('/unconfirmed')
 def unconfirmed():
+    '''
     if current_user.is_anonymous():
         return redirect(url_for('main.index'))
     if current_user.confirmed:
         abort(404)
+    '''
+    if current_user.is_anonymous() or current_user.confirmed:
+        return redirect(url_for('main.index'))
     return render_template('auth/unconfirmed.html')
 
 

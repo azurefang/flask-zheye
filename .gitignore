@@ -55,3 +55,12 @@ docs/_build/
 *.sqlite
 
 venv/
+.python-version
+
+.idea/
+
+migrations/
+
+celerybeat-schedule
+
+
