@@ -8,7 +8,7 @@
 <b>最新动态</b>
 {% for activity in activities %}
 <div class="hello">
-<a href="{{ url_for('main.people', pid=activity.owner.id) }}">{{ activity.owner.firstname}}{{ activity.owner.lastname }}</a>
+<a href="{{ url_for('main.user', uid=activity.owner.id) }}">{{ activity.owner.firstname}}{{ activity.owner.lastname }}</a>
 {% if activity.move==1 %}
 回答了问题
 {% elif activity.move==2 %}
@@ -19,7 +19,7 @@
 关注了话题
 {% endif %}
 {% if activity.move!=4 %}
-<a href="{{ url_for('main.question', qid=activity.question.id+19550224) }}"><b>{{ activity.question.title }}</b></a>
+<a href="{{ url_for('main.question', qid=activity.question.id) }}"><b>{{ activity.question.title }}</b></a>
 {% else %}
 <a href="{{ url_for('main.topic', tid=activity.topic.id) }}">{{ activity.topic.name }}</a>
 {% endif %}

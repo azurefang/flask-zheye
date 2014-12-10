@@ -1,29 +1,31 @@
-# -*- coding:utf-8 -*-
-import sys
+# coding:utf-8
+
 from flask import request, json, Response
-from . import ajax
 from flask.ext.login import current_user
-from ..models import *
+
+from ..models import User, Topic, Question, Activity
+from . import ajax
 from app import db
+
 
 @ajax.route('/relationship', methods=['POST', 'GET'])
 def relationship():
     if request.method == 'GET':
         type = request.args.get('type', '')
         id = request.args.get('id', '')
-        if type=='user':
-            if current_user.is_following_user(User.query.filter_by(id=int(id)).first()):
+        if type == 'user':
+            if current_user.is_following_user(User.query.get(int(id))):
                 return '取消关注'
             else:
                 return '关注'
         if type == 'topic':
-            if current_user.is_following_topic(Topic.query.filter_by(id=int(id)).first()):
+            if current_user.is_following_topic(Topic.query.get(int(id))):
                 return '取消关注'
             else:
                 return '关注'
         if type == 'question':
-            id = int(id) - 19550224
-            if current_user.is_following_question(Question.query.filter_by(id=id).first()):
+            print type, id
+            if current_user.is_following_question(Question.query.get(int(id))):
                 return '取消关注'
             else:
                 return '关注'
@@ -31,32 +33,31 @@ def relationship():
     if request.method == 'POST':
         type = request.form.get('type')
         id = request.form.get('id')
-        if type=='user':
-            user = User.query.filter_by(id=int(id)).first()
+        if type == 'user':
+            user = User.query.get(int(id))
             if current_user.is_following_user(user):
-                current_user.followed.remove(user)
+                current_user.unfollow_user(user)
             else:
-                current_user.followed.append(user)
+                current_user.follow_user(user)
         if type == 'topic':
-            topic = Topic.query.filter_by(id=int(id)).first()
+            topic = Topic.query.get(int(id))
             if current_user.is_following_topic(topic):
-                current_user.followed_topics.remove(topic)
+                current_user.unfollow_topic(topic)
             else:
-                current_user.followed_topics.append(topic)
+                current_user.follow_topic(topic)
                 new_activity = Activity(user_id=current_user.id, topic_id=topic.id, move=4)
                 db.session.add(new_activity)
         if type == 'question':
-            id = int(id) - 19550224
-            question = Question.query.filter_by(id=id).first()
+            question = Question.query.get(int(id))
             if current_user.is_following_question(question):
-                current_user.followed_questions.remove(question)
+                current_user.unfollow_question(question)
             else:
-                current_user.followed_questions.append(question)
+                current_user.follow_question(question)
                 new_activity = Activity(user_id=current_user.id, question_id=id, move=2)
                 db.session.add(new_activity)
         db.session.commit()
-
         return 'success'
+
 
 @ajax.route('/topic')
 def topic():
