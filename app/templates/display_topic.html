@@ -2,13 +2,13 @@
 {% block title %} {{ topic.name }} {% endblock %}
 {% block page_content %}
     <h3>{{ topic.name }}</h3>
-    {% for i in topic.related_questions.all() %}
+    {% for i in topic.get_questions() %}
      <div class="hello">
         <p><a href="{{ url_for('main.question', qid=i.id+19550224) }}">{{ i.title }}</a></p>
         <div>
         {{ i.content }}
         <div>
-        {{ i.time.strftime('%Y-%m-%d') }}
+        {{ i.timestamp.strftime('%Y-%m-%d') }}
         </div>
         </div>
         </div>
@@ -48,7 +48,7 @@ function(data, status) {
 );
 </script>
 <div class="content">
-{{ topic.followers|length }} 个用户关注这个话题
+{{ topic.get_followers()|length }} 个用户关注这个话题
 </div>
     <div>
 {% endblock %}

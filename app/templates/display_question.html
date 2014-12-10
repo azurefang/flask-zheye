@@ -4,7 +4,7 @@
 {% block page_content %}
 
 
-{% for topic in question.topics %}
+{% for topic in question.get_topics() %}
 <a class="btn btn-info" href="{{ url_for('main.topic', tid=topic.id)}}">{{ topic.name }}</a>
 {% endfor %}
 <div class="question">
@@ -20,14 +20,14 @@
 <div class="content">
 {{ answer.content|safe }}
 </div>
-{{ answer.time.strftime('%Y-%m-%d') }}
+{{ answer.timestamp.strftime('%Y-%m-%d') }}
     <span>Thank</span>
     <span>Collect</span>
 </div>
 {% endfor %}
 
 <div class="answer">
-    <a href="{{ url_for('main.people', pid=current_user.id) }}">{{ current_user.firstname }}{{ current_user.lastname }}</a>
+    <a href="{{ url_for('main.user', uid=current_user.id) }}">{{ current_user.username}}</a>
 <div class="content">
 {{ wtf.quick_form(form)}}
 </div>
