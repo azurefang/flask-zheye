@@ -1,12 +1,13 @@
 # coding:utf-8
 
-from flask import render_template, redirect, abort, request, flash, Markup
+from flask import render_template, redirect, abort, request, flash, Markup, session, url_for
 from flask.ext.login import current_user, login_required
+from flask.ext.socketio import emit
 from sqlalchemy import desc
 from . import main
-from app import db, conn
+from app import db, conn, socketio
 from .forms import AskForm, AnswerForm
-from ..models import User, Topic, Question, Answer, Activity
+from ..models import User, Topic, Question, Answer, Activity, Message
 
 
 @main.route('/')
@@ -75,7 +76,7 @@ def question(qid):
     return render_template('display_question.html', question=question, form=form)
 
 
-@main.route('/user/<uid>')
+@main.route('/user/<int:uid>')
 def user(uid):
     user = User.query.filter_by(id=uid).first()
 
@@ -90,3 +91,30 @@ def topic(tid):
     if topic is None:
         abort(404)
     return render_template('display_topic.html', topic=topic)
+
+
+@socketio.on('collect_answer')
+def collect_answer(message):
+    path = message['path']
+    question_id = int(path.split('/')[2])
+    answer_id = int(message['id'])
+    question = Question.query.get(question_id)
+    content = u'<a href="{user_url}">{user}</a>收藏了你在<a href="{question_url}">{question}</a>下的回答'.format(
+        user=current_user.username,
+        user_url=url_for('main.user', uid=current_user.id),
+        question_url=url_for('main.question', qid=question_id),
+        question=question.title,
+    )
+    print current_user.__dict__
+    message = Message(content=content)
+    current_user.add_message(message)
+    db.session.add(message)
+    session['message_count'] = session.get('message_count', 0) + 1
+    emit('count', {"data": session['message_count']})
+    answer = Answer.query.get(answer_id)
+    current_user.collect_answer(answer)
+
+
+@socketio.on('connect')
+def test_connect():
+    emit('count', {'data': 'connected'})

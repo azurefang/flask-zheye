@@ -64,3 +64,10 @@ def topic():
     all_topics = [i.name for i in Topic.query.all()]
     result = json.dumps(all_topics)
     return Response(result, mimetype='application/json')
+
+
+@ajax.route('/messages')
+def messages():
+    if request.method == 'GET':
+        messages = [message.content for message in current_user.get_unread_messages()]
+        return Response(json.dumps(messages), mimetype='application/json')

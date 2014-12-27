@@ -102,6 +102,15 @@ class QuestionTopic(db.Model):
         db.Integer, db.ForeignKey('topics.id'), primary_key=True)
 
 
+class MessageDeliver(db.Model):
+    __tablename__ = 'messagedelivers'
+    user_id = db.Column(
+        db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    message_id = db.Column(
+        db.Integer, db.ForeignKey('messages.id'), primary_key=True)
+    unread = db.Column(db.Boolean, default=True)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -144,6 +153,12 @@ class User(UserMixin, db.Model):
                                             'collector', lazy='joined'),
                                         lazy='dynamic',
                                         cascade='all, delete-orphan')
+    messages = db.relationship('MessageDeliver',
+                               foreign_keys=[MessageDeliver.user_id],
+                               backref=db.backref(
+                                   'deliver', lazy='joined'),
+                               lazy='dynamic',
+                               cascade='all, delete-orphan')
     comments = db.relationship('Comment', backref='owner', lazy='dynamic')
     questions = db.relationship('Question', backref='owner', lazy='dynamic')
     answers = db.relationship('Answer', backref='owner', lazy='dynamic')
@@ -228,6 +243,14 @@ class User(UserMixin, db.Model):
         if c:
             db.session.delete(c)
 
+    def has_message(self, message):
+        return self.messages.filter_by(message_id=message.id).first() is not None
+
+    def add_message(self, message):
+        if not self.has_message(message):
+            d = MessageDeliver(deliver=self, message=message)
+            db.session.add(d)
+
     def is_followed_by(self, user):
         return self.followers.filter_by(user_id=user.id).first() is not None
 
@@ -248,6 +271,12 @@ class User(UserMixin, db.Model):
 
     def get_followers(self):
         return [rel.follower for rel in self.followers]
+
+    def get_unread_messages(self):
+        return [rel.message for rel in self.messages.filter_by(unread=True)]
+
+    def get_read_messages(self):
+        return [rel.message for rel in self.messages.filter_by(unread=False)]
 
     def __repr__(self):
         return "<User:{}>".format(self.username)
@@ -370,13 +399,21 @@ class Activity(db.Model):
     answer_id = db.Column(db.Integer, db.ForeignKey('answers.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow())
 
+    def __repr__(self):
+        return "<Activity:{}>".format(self.id)
+
 
 class Message(db.Model):
     __tablename__ = 'messages'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    read = db.Column(db.Boolean, default=False)
     content = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow())
+    delivers = db.relationship('MessageDeliver',
+                               foreign_keys=[MessageDeliver.message_id],
+                               backref=db.backref(
+                                   'message', lazy='joined'),
+                               lazy='dynamic',
+                               cascade='all, delete-orphan')
 
     def __repr__(self):
         return "<Message:{}>".format(self.id)

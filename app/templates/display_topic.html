@@ -4,7 +4,7 @@
     <h3>{{ topic.name }}</h3>
     {% for i in topic.get_questions() %}
      <div class="hello">
-        <p><a href="{{ url_for('main.question', qid=i.id+19550224) }}">{{ i.title }}</a></p>
+        <p><a href="{{ url_for('main.question', qid=i.id) }}">{{ i.title }}</a></p>
         <div>
         {{ i.content }}
         <div>

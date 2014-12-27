@@ -21,8 +21,7 @@
 {{ answer.content|safe }}
 </div>
 {{ answer.timestamp.strftime('%Y-%m-%d') }}
-    <span>Thank</span>
-    <span>Collect</span>
+<button class="collect" id="{{ answer.id }}">Collect</span>
 </div>
 {% endfor %}
 

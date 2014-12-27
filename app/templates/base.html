@@ -16,10 +16,15 @@
 <script type="text/javascript" src="{{ url_for('static', filename='simditor/scripts/js/uploader.js') }}"></script>
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
 <script type="text/javascript" charset="utf-8">
+    $(document).ready(function(){
     var socket = io.connect('http://' + document.domain + ':' + location.port);
-    socket.on('message', function(data) {
-        socket.emit('text', {data: 'I\'m connected!'});
-        alert(data);
+    socket.on('count', function(msg) {
+        $('.count').text(msg["data"])
+    });
+    $('.collect').click(function(event) {
+        socket.emit('collect_answer', {path: location.pathname, id: $('.collect').attr('id')});
+        return false;
+    });
     });
 </script>
 <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -37,6 +42,7 @@
             <ul class="nav navbar-nav">
             </ul>
             <ul class="nav navbar-nav navbar-right">
+                <li><a class="count" href="#"></a></li>
                 {%if current_user.is_authenticated() %}
                 <li><a href="{{ url_for('auth.logout') }}">Sign out</a></li>
                 {% else %}
