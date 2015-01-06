@@ -8,7 +8,13 @@
 <b>最新动态</b>
 {% for activity in activities %}
 <div class="hello">
-<a href="{{ url_for('main.user', uid=activity.owner.id) }}">{{ activity.owner.firstname}}{{ activity.owner.lastname }}</a>
+<a href="{{ url_for('main.user', uid=activity.owner.id) }}">
+    {% if activity.owner == current_user %}
+    你
+    {% else %}
+    {{ activity.owner.username}}
+    {% endif %}
+    </a>
 {% if activity.move==1 %}
 回答了问题
 {% elif activity.move==2 %}
@@ -33,10 +39,15 @@
 </div>
 {% endif %}
 </div>
+{{ activity.timestamp.strftime('%Y-%m-%d') }}
 {% endfor %}
 </div>
 
 <div class="pagination">
     {{ macros.pagination_widget(pagination, '.index') }}
 </div>
+{% endblock %}
+
+{% block sidebar %}
+<a class="btn btn-success" href="{{ url_for('main.ask') }}">提问</a>
 {% endblock %}

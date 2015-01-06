@@ -267,7 +267,7 @@ class User(UserMixin, db.Model):
         return self.collected_answers.filter_by(answer_id=answer.id).first() is not None
 
     def get_followed_users(self):
-        return [rel.follower for rel in self.followed_users]
+        return [rel.followed_user for rel in self.followed_users]
 
     def get_followers(self):
         return [rel.follower for rel in self.followers]
@@ -277,6 +277,21 @@ class User(UserMixin, db.Model):
 
     def get_read_messages(self):
         return [rel.message for rel in self.messages.filter_by(unread=False)]
+
+    def get_questions(self):
+        return Question.query.filter_by(owner=self).all()
+
+    def get_answers(self):
+        return Answer.query.filter_by(owner=self).all()
+
+    def unable_answer_question(self, question):
+        '''
+        if self is question.owner or self in [answer.owner for answer in question.answers]:
+            return True
+        else:
+            return False
+        '''
+        return False
 
     def __repr__(self):
         return "<User:{}>".format(self.username)

@@ -1,6 +1,3 @@
-{% extends "bootstrap/base.html" %}
-
-
 {% block navbar %}
 <meta http-equiv="Content-Type" content="text/html; charset=GBK" />
 <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
@@ -18,12 +15,33 @@
 <script type="text/javascript" charset="utf-8">
     $(document).ready(function(){
     var socket = io.connect('http://' + document.domain + ':' + location.port);
+    socket.emit('join', {room: 'user:' + {{ current_user.id }}});
     socket.on('count', function(msg) {
         $('.count').text(msg["data"])
     });
-    $('.collect').click(function(event) {
-        socket.emit('collect_answer', {path: location.pathname, id: $('.collect').attr('id')});
-        return false;
+    socket.emit('collect', {})
+    socket.on('collect_or_not', function(msg) {
+        $('.collect').text(msg["data"])
+    });
+    $('.collect').each(function() {
+
+        $.get("/ajax/collect",
+        {
+            id : $(this).attr("id")
+        },
+            function(data, status){
+                $(this).text(data);
+            }
+        );
+
+        $(this).click(function() {
+            socket.emit('collect_answer', {path: location.pathname, id: $(this).attr('id')});
+            if ($(this).text() == "收藏")
+            $(this).text("取消收藏");
+            else
+            $(this).text("收藏");
+            return false;
+        })
     });
     });
 </script>
@@ -42,11 +60,20 @@
             <ul class="nav navbar-nav">
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a class="count" href="#"></a></li>
                 {%if current_user.is_authenticated() %}
-                <li><a href="{{ url_for('auth.logout') }}">Sign out</a></li>
+                {% set message_count = current_user.get_unread_messages()|length %}
+                <li><a href="{{ url_for('main.unread') }}">消息<span class="badge count">{{ message_count }}</span></a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" id="dropdownMenu1" aria-expanded="false" href="#">
+                        {{ current_user.username }}
+                    </a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                        <li><a  href="{{ url_for('main.user', uid=current_user.id) }}">主页</a></li> 
+                        <li><a href="{{ url_for('auth.logout') }}">退出</a></li>
+                    </ul>
+                </li>
                 {% else %}
-                <li><a href="{{ url_for('auth.login') }}">Sign in</a></li>
+                <li><a href="{{ url_for('auth.login') }}">登录</a></li>
                 {% endif %}
             </ul>
         </div>

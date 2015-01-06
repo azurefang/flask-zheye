@@ -3,7 +3,7 @@
 from flask import request, json, Response
 from flask.ext.login import current_user
 
-from ..models import User, Topic, Question, Activity
+from ..models import User, Topic, Question, Activity, Answer
 from . import ajax
 from app import db
 
@@ -24,7 +24,6 @@ def relationship():
             else:
                 return '关注'
         if type == 'question':
-            print type, id
             if current_user.is_following_question(Question.query.get(int(id))):
                 return '取消关注'
             else:
@@ -71,3 +70,13 @@ def messages():
     if request.method == 'GET':
         messages = [message.content for message in current_user.get_unread_messages()]
         return Response(json.dumps(messages), mimetype='application/json')
+
+
+@ajax.route('/collect')
+def collect():
+    if request.method == 'GET':
+        id = request.args.get('id', '')
+        if current_user.is_collecting_answer(Answer.query.get(int(id))):
+            return u'取消收藏'
+        else:
+            return u'收藏'

@@ -6,9 +6,9 @@ from wtforms.validators import Required
 
 
 class AskForm(Form):
-    title = StringField('title', validators=[Required()])
-    topics = TextField('topic', id='choose')
-    content = TextAreaField('content', validators=[Required()])
+    title = StringField(u'标题', validators=[Required()])
+    topics = TextField(u'话题', id='choose')
+    content = TextAreaField(u'题干', validators=[Required()])
     anonymous = BooleanField(u'匿名', default=False)
     submit = SubmitField(u'提问')
 

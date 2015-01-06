@@ -31,3 +31,7 @@ body {
   padding-top: 10px;
   padding-bottom: 10px;
  }
+
+.nav > li:hover .dropdown-menu {
+    display: block;
+}

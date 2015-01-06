@@ -2,12 +2,13 @@
 
 from flask import render_template, redirect, url_for, request, flash, abort, current_app
 from flask.ext.login import login_user, logout_user, login_required, current_user
+from flask.ext.socketio import join_room, leave_room, emit
 
 from . import auth
 from ..email import send_mail
 from ..models import User
 from .forms import LoginForm, RegistrationForm
-from app import db, conn, cache
+from app import db, conn, cache, socketio
 
 
 @auth.before_app_request
@@ -28,7 +29,7 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verity_password(form.password.data):
             login_user(user, form.remember_me.data)
-            flash('welcome back')
+            flash(u'欢迎回来')
             return redirect(request.args.get('next') or url_for('main.index'))
         flash('Invalid username or password')
     return render_template('auth/login.html', form=form)

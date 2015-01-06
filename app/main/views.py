@@ -2,7 +2,7 @@
 
 from flask import render_template, redirect, abort, request, flash, Markup, session, url_for
 from flask.ext.login import current_user, login_required
-from flask.ext.socketio import emit
+from flask.ext.socketio import emit, send, join_room
 from sqlalchemy import desc
 from . import main
 from app import db, conn, socketio
@@ -14,14 +14,15 @@ from ..models import User, Topic, Question, Answer, Activity, Message
 @main.route('/index')
 @login_required
 def index():
-    if current_user.followed_questions.all()==current_user.followed_topics.all()==current_user.followed_users.all()==[]:
+    if current_user.followed_questions.all()==current_user.followed_topics.all()==current_user.get_followed_users()==[]:
         message = Markup(u'你尚未有任何动态，试着第一次<a href="/ask">提问</a>')
         flash(message)
+    print current_user
     activities = Activity.query.filter_by(user_id=current_user.id)
     for user in current_user.get_followed_users():
-        activities.union(Activity.query.filter_by(user_id=user.id))
+        activities = activities.union(Activity.query.filter_by(user_id=user.id))
     page = request.args.get('page', 1, type=int)
-    pagination = activities.order_by(desc(Activity.timestamp)).paginate(page, per_page=4)
+    pagination = activities.order_by(desc(Activity.timestamp)).paginate(page, per_page=10)
     activities = pagination.items
     return render_template('index.html', activities=activities, pagination=pagination)
 
@@ -50,7 +51,6 @@ def ask():
         activity = Activity(user_id=current_user.id, question_id=question.id, move=3)
         db.session.add(activity)
         db.session.commit()
-        conn.lpush("message", "user" + str(current_user.id) + ":xx ask a new question")
         return redirect('/question/{}'.format(question.id))
     return render_template('ask_question.html', form=form)
 
@@ -98,23 +98,40 @@ def collect_answer(message):
     path = message['path']
     question_id = int(path.split('/')[2])
     answer_id = int(message['id'])
+    print answer_id
     question = Question.query.get(question_id)
+    answer = Answer.query.get(answer_id)
     content = u'<a href="{user_url}">{user}</a>收藏了你在<a href="{question_url}">{question}</a>下的回答'.format(
         user=current_user.username,
         user_url=url_for('main.user', uid=current_user.id),
         question_url=url_for('main.question', qid=question_id),
         question=question.title,
     )
-    print current_user.__dict__
     message = Message(content=content)
-    current_user.add_message(message)
+    answer.owner.add_message(message)
     db.session.add(message)
-    session['message_count'] = session.get('message_count', 0) + 1
-    emit('count', {"data": session['message_count']})
+    message_count = len(answer.owner.get_unread_messages())
+    session['message_count'] = message_count + 1
+    #emit('join', {'room': 'user:' + str(current_user.id)})
+    emit('count', {"data": session['message_count']}, room='user:' + str(answer.owner_id))
     answer = Answer.query.get(answer_id)
     current_user.collect_answer(answer)
 
 
-@socketio.on('connect')
-def test_connect():
-    emit('count', {'data': 'connected'})
+@main.route('/unread')
+def unread():
+    for message in current_user.messages.filter_by(unread=True):
+        message.unread = False
+        db.session.add(message)
+    return render_template('unread.html', topic=topic)
+
+
+@main.route('/collections')
+def collections():
+    return render_template('collections.html', topic=topic)
+
+
+@socketio.on('join')
+def join(message):
+    join_room(message['room'])
+

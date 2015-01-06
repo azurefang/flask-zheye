@@ -1,7 +1,49 @@
 {% extends 'base.html' %}
 {% block title %} {{ user.firstname }}{{ user.lastname }}- 者也{% endblock %}
 {% block page_content %}
-    {{ user.firstname }}{{ user.lastname }}
+    <h2>
+    {{ user.username }}
+    </h2>
+    <div>
+        <div>
+            <h3>提问 {{ user.get_questions()|length }}</h3>
+        </div>
+        <div>
+            {% for question in user.get_questions() %}
+            <div class="hello">
+                <div>
+                    <a href="{{ url_for('main.question', qid=question.id) }}">{{ question.title }}</a>
+                </div>
+                <div>
+                    {{ question.content }}
+                </div>
+                <div>
+                    {{ question.timestamp.strftime('%Y-%m-%d') }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div>
+        <div>
+            <h3>回答 {{ user.get_answers()|length }}</h3>
+        </div>
+        <div>
+            {% for answer in user.get_answers() %}
+            <div>
+                <div class="hello">
+                    <b><a href="{{ url_for('main.question', qid=answer.question.id) }}">{{ answer.question.title }}</a></b>
+                </div>
+                <div>
+                    {{ answer.content|safe}}
+                </div>
+                <div>
+                    {{ answer.timestamp.strftime('%Y-%m-%d') }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}
 
 {% block sidebar %}
