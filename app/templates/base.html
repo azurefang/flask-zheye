@@ -25,14 +25,20 @@
     });
     $('.collect').each(function() {
 
-        $.get("/ajax/collect",
-        {
-            id : $(this).attr("id")
-        },
-            function(data, status){
-                $(this).text(data);
+        this_collect = this;
+
+        (function (this_collect) {
+        $.ajax({
+            type: 'GET',
+            url: "/ajax/collect",
+            async: false,
+            data : {
+                id : $(this_collect).attr("id")
+            },
+            success: function(data, status){
+                $(this_collect).text(data);
             }
-        );
+        });}) (this_collect);
 
         $(this).click(function() {
             socket.emit('collect_answer', {path: location.pathname, id: $(this).attr('id')});

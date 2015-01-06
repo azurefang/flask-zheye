@@ -285,13 +285,10 @@ class User(UserMixin, db.Model):
         return Answer.query.filter_by(owner=self).all()
 
     def unable_answer_question(self, question):
-        '''
         if self is question.owner or self in [answer.owner for answer in question.answers]:
             return True
         else:
             return False
-        '''
-        return False
 
     def __repr__(self):
         return "<User:{}>".format(self.username)

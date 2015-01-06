@@ -1,1 +1,10 @@
 {% extends 'base.html' %}
+{% block title %} 未读消息  {% endblock %}
+
+{% block page_content %}
+{% for message in current_user.get_unread_messages() %}
+    <div class="hello">
+    {{ message.content|safe }}
+    </div>
+{% endfor %}
+{% endblock %}

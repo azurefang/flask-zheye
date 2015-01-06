@@ -101,21 +101,23 @@ def collect_answer(message):
     print answer_id
     question = Question.query.get(question_id)
     answer = Answer.query.get(answer_id)
-    content = u'<a href="{user_url}">{user}</a>收藏了你在<a href="{question_url}">{question}</a>下的回答'.format(
-        user=current_user.username,
-        user_url=url_for('main.user', uid=current_user.id),
-        question_url=url_for('main.question', qid=question_id),
-        question=question.title,
-    )
-    message = Message(content=content)
-    answer.owner.add_message(message)
-    db.session.add(message)
-    message_count = len(answer.owner.get_unread_messages())
-    session['message_count'] = message_count + 1
-    #emit('join', {'room': 'user:' + str(current_user.id)})
-    emit('count', {"data": session['message_count']}, room='user:' + str(answer.owner_id))
-    answer = Answer.query.get(answer_id)
-    current_user.collect_answer(answer)
+    if current_user.is_collecting_answer(answer):
+        current_user.uncollect_answer(answer)
+    else:
+        content = u'<a href="{user_url}">{user}</a>收藏了你在<a href="{question_url}">{question}</a>下的回答'.format(
+            user=current_user.username,
+            user_url=url_for('main.user', uid=current_user.id),
+            question_url=url_for('main.question', qid=question_id),
+            question=question.title,
+        )
+        message = Message(content=content)
+        answer.owner.add_message(message)
+        db.session.add(message)
+        message_count = len(answer.owner.get_unread_messages())
+        session['message_count'] = message_count + 1
+        emit('count', {"data": session['message_count']}, room='user:' + str(answer.owner_id))
+        answer = Answer.query.get(answer_id)
+        current_user.collect_answer(answer)
 
 
 @main.route('/unread')
